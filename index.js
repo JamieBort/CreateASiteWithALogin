@@ -3,10 +3,9 @@
 const express = require('express');
 const exphbs = require('express-handlebars');
 const bodyParser = require('body-parser');
-// const morgan = require('morgan'); // maybe not needed?
 const expressValidator = require('express-validator');
 const session = require('express-session');
-const app = express()
+const app = express();
 
 // ========== Define templates ==========
 // make sure 'handlebars' below matched the second paramenter in the line of code: app.set('view engine', 'handlebars');
@@ -19,7 +18,7 @@ app.set('view engine', 'handlebars');
 
 app.use(
   session({
-    secret: 'CROWpoe', // this is a password. in the future this is not how to store passwords.
+    secret: 'CROWpoe', // this is a password. it is hard coded. in the future this is not how to store passwords.
     resave: false, // since false, this does not save without changes
     saveUninitialized: true // creates a session
   })
@@ -55,68 +54,79 @@ let myDatabase = [{
   }
 ];
 
-// ========== endpoints ==========
+// ========== ENDPOINTS ==========
 
 // path to index
 app.get('/', function(req, res) {
   // res.sender("Hello!!!!!!"); displays "Hello!!!!!!" on the / page.
-  res.send("Hello!!!!!!");
-})
+  if (!req.session.victim) {
+    res.redirect('/login')
+  } else {
+    res.render('home', {
+      username: req.session.victim
+    });
+  }
+});
 
 // path to login
 app.get('/login', function(req, res) {
   // res.render('login'); brings you to login.handlebars. the html in login.handlebars gets rendered
-  res.render('login');
-})
+  res.render('login')
+});
 
-// path to login
-app.get('/home', function(req, res) {
-  // res.render('home'); brings you to home.handlebars. the html in home.handlebars gets rendered
-  res.render('home');
+app.post('/login', function(req, res) {
+  let user = req.body;
 
 
-// ========== validation ==========
-// checking to see if the field is empty
-req.checkBody('username', 'Username is required').notEmpty();
-// checking to see if the field is empty
-req.checkBody('password', 'Password is required').notEmpty();
+  // // path to login
+  // app.get('/home', function(req, res) {
+  //   // res.render('home'); brings you to home.handlebars. the html in home.handlebars gets rendered
+  //   res.render('home');
 
-let errors = req.validationErrors();
-// if there is an error, print it
-if (errors) {
-  errors: errors
-}
-else {
-  // otherwise
-  let users = myDatabase.filter(function(userCheck) {
-    return userCheck.username === req.body.usernames; //return userCheck.username === req.sessionsbody.usernames;
-  });
 
-  // if the username the person entered does not match a username in the database the do the following below
+  // ========== validation ==========
+  // checking to see if the field is empty
+  req.checkBody('username', 'Username is required').notEmpty();
+  // checking to see if the field is empty
+  req.checkBody('password', 'Password is required').notEmpty();
 
-  // return an error
-
-  if (users.length === 0) {
-    let not_a_user = "User not found. Please create an account."
+  let errors = req.validationErrors();
+  // if there is an error, print it
+  if (errors) {
     res.render('login', {
-      notAUserMessage: not_a_user
+      errors: errors
     });
-    return;
-  }
-
-  let user = users[0];
-
-  // if the passwords match, redirect to the home page
-  if (user.password === req.body.password) {
-    req.session.victim = user.username;
-    res.redirect('/');
   } else {
-    let not_ur_password = "Donk."
-    res.render('login', {
-      someting: not_ur_password
+    // otherwise
+    let users = myDatabase.filter(function(userCheck) {
+      return userCheck.username === req.body.username; //return userCheck.username === req.sessionsbody.usernames;
     });
+
+    // if the username the person entered does not match a username in the database the do the following below
+
+    // return an error
+
+    if (users.length === 0) {
+      let not_a_user = "User not found. Please create an account."
+      res.render('login', {
+        notAUserMessage: not_a_user
+      });
+      return;
+    }
+
+    let user = users[0];
+
+    // if the passwords match, redirect to the home page
+    if (user.password === req.body.password) {
+      req.session.victim = user.username;
+      res.redirect('/');
+    } else {
+      let not_ur_password = "That's not correct."
+      res.render('login', {
+        someting: not_ur_password
+      });
+    }
   }
-}
 });
 
 // ========== make express listen on port 3000 ==========
