@@ -1,3 +1,5 @@
+// When refactoring this consult ben's and kelly's
+
 // ========== Define packages ==========
 
 const express = require('express');
@@ -132,5 +134,5 @@ app.post('/login', function(req, res) {
 // ========== make express listen on port 3000 ==========
 app.listen(3000, function() {
   // feedback. Is the apprunning?
-  console.log("The app is running");
+  console.log("The app is running on http://localhost:3000/");
 });
