@@ -12,12 +12,15 @@ The valid usernames and passwords should be kept as a data structure in your app
 
 ToDo:
 1. set up files
+
   a.  Create 
         i. 2 endpionts (handlebars templates)
         ii. root (/)
         iii. login (/login)
     b. Create 1 css file (optional)
+
     c. javascript
+    
     d. 
         i. .gitignore
         ii. node-modules/
